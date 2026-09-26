@@ -1,5 +1,5 @@
 # Test Assets
 
-- Kenney Modular Character Pack (CC0) - correctly layered skin, clothing, face parts
-- Mouth flaps from Kenney Face/Mouth sprites (straight / oh / glad)
+- Kenney Modular Character Pack (CC0) with per-part layout anchors
+- Mouth flaps from Kenney Face/Mouth sprites
 - Generated flat-color backgrounds

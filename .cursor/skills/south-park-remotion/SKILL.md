@@ -42,16 +42,12 @@ Frame numbers are **per-scene local** for dialogue; scenes are sequenced in `Tes
 
 ## Character layers
 
-Each character needs PNGs in `public/assets/characters/<id>/`:
+`scripts/prepare-assets.mjs` writes one PNG per part to `public/assets/characters/<id>/` (`head`, `neck`, `shirt`, `arms`, `hands`, `pants`, `legs`, `shoes`, `eyes`, `eyebrows`, `nose`, `hair`, `mouth-closed/open/wide`) and syncs `layers` + `layout` into the episode JSON.
 
-| File | Purpose |
-|------|---------|
-| `body.png` | Torso |
-| `head.png` | Head |
-| `arm-left.png` / `arm-right.png` | Arms |
-| `mouth-closed.png` | Rest mouth |
-| `mouth-open.png` | Flap A |
-| `mouth-wide.png` | Flap B |
+- `layout.parts` is a back-to-front list of `{ layer, x, y, width, height, flipX? }` on a shared canvas; single-sided sprites (arms, legs, eyes…) appear twice, mirrored with `flipX`.
+- `layout.mouths` holds the box for each mouth shape; the `mouth` entry in `parts` sets its z-order.
+- `placement` is `{ x: center, y: feet baseline, scale }`; override per scene with `scene.placements[id]`.
+- Episode duration is computed from the scene lengths (`calculateMetadata` in `Root.tsx`).
 
 ## Mouth flap rules
 

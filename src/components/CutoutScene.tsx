@@ -1,13 +1,14 @@
 import { AbsoluteFill, Img, Sequence, staticFile, useVideoConfig } from "remotion";
 import { PaperCharacter } from "./PaperCharacter";
-import type { SceneShot } from "../lib/types";
+import type { SceneShot, TestEpisodeProps } from "../lib/types";
 
 interface CutoutSceneProps {
   shot: SceneShot;
+  characters: TestEpisodeProps["episode"]["characters"];
   from: number;
 }
 
-export const CutoutScene: React.FC<CutoutSceneProps> = ({ shot, from }) => {
+export const CutoutScene: React.FC<CutoutSceneProps> = ({ shot, characters, from }) => {
   const { fps } = useVideoConfig();
 
   return (
@@ -22,17 +23,21 @@ export const CutoutScene: React.FC<CutoutSceneProps> = ({ shot, from }) => {
             imageRendering: "auto",
           }}
         />
-        {shot.characters.map((character) => (
-          <PaperCharacter
-            key={character.id}
-            id={character.id}
-            layers={character.layers}
-            placement={character.placement}
-            dialogue={shot.dialogue}
-            sceneStartFrame={from}
-            fps={fps}
-          />
-        ))}
+        {shot.characterIds.map((characterId) => {
+          const character = characters[characterId];
+          if (!character) return null;
+          return (
+            <PaperCharacter
+              key={characterId}
+              id={characterId}
+              layers={character.layers}
+              layout={character.layout}
+              placement={shot.placements?.[characterId] ?? character.placement}
+              dialogue={shot.dialogue}
+              fps={fps}
+            />
+          );
+        })}
         <SubtitleOverlay dialogue={shot.dialogue} />
       </AbsoluteFill>
     </Sequence>

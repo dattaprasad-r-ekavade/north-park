@@ -9,6 +9,55 @@ const downloads = path.join(root, "downloads");
 const publicDir = path.join(root, "public");
 const pngRoot = path.join(downloads, "extracted-characters", "PNG");
 
+/**
+ * Back-to-front placement of Kenney modular parts on a shared canvas, matching the pack's
+ * instruction.png. Parts use `x` (left edge) or `cx` (horizontal center); single-sided
+ * sprites (arms, hands, legs, shoes, brows) are mirrored with `flipX` for the other side.
+ */
+const KENNEY_LAYOUT = {
+  canvas: { width: 340, height: 580 },
+  mouthCenter: { cx: 170, cy: 154 },
+  parts: [
+    { layer: "legs", x: 62, y: 380, flipX: true },
+    { layer: "legs", x: 167, y: 380 },
+    { layer: "shoes", x: 44, y: 532 },
+    { layer: "shoes", x: 202, y: 532, flipX: true },
+    { layer: "arms", x: 6, y: 200 },
+    { layer: "arms", x: 216, y: 200, flipX: true },
+    { layer: "hands", x: 0, y: 268 },
+    { layer: "hands", x: 279, y: 268, flipX: true },
+    { layer: "neck", cx: 170, y: 175 },
+    { layer: "shirt", cx: 170, y: 195 },
+    { layer: "pants", cx: 170, y: 350 },
+    { layer: "head", cx: 170, y: 20 },
+    { layer: "eyes", cx: 145, y: 105 },
+    { layer: "eyes", cx: 195, y: 105 },
+    { layer: "eyebrows", cx: 143, y: 88 },
+    { layer: "eyebrows", cx: 197, y: 88, flipX: true },
+    { layer: "nose", cx: 170, y: 122 },
+    { layer: "mouth" },
+    { layer: "hair", cx: 170, y: 5 },
+  ],
+};
+
+const LAYER_FILES = {
+  shoes: "shoes.png",
+  legs: "legs.png",
+  pants: "pants.png",
+  neck: "neck.png",
+  shirt: "shirt.png",
+  arms: "arms.png",
+  hands: "hands.png",
+  head: "head.png",
+  eyes: "eyes.png",
+  eyebrows: "eyebrows.png",
+  nose: "nose.png",
+  hair: "hair.png",
+  mouthClosed: "mouth-closed.png",
+  mouthOpen: "mouth-open.png",
+  mouthWide: "mouth-wide.png",
+};
+
 const ensureDir = (dir) => fs.mkdirSync(dir, { recursive: true });
 
 const copyFile = (src, dest) => {
@@ -37,75 +86,94 @@ const extractZip = (zipPath, outDir) => {
 
 const resolve = (...parts) => path.join(pngRoot, ...parts);
 
-/** Kenney modular parts that share the same canvas anchor. */
 const CHARACTER_PRESETS = {
   hero: {
-    pants: resolve("Pants", "Blue 1", "pantsBlue11.png"),
-    shirt: resolve("Shirts", "Blue", "blueShirt1.png"),
     shoes: resolve("Shoes", "Blue", "blueShoe1.png"),
-    arm: resolve("Shirts", "Blue", "blueArm_short.png"),
+    legs: resolve("Pants", "Blue 1", "pantsBlue1_long.png"),
+    pants: resolve("Pants", "Blue 1", "pantsBlue11.png"),
+    neck: resolve("Skin", "Tint 1", "tint1_neck.png"),
+    shirt: resolve("Shirts", "Blue", "blueShirt1.png"),
+    arms: resolve("Shirts", "Blue", "blueArm_short.png"),
+    hands: resolve("Skin", "Tint 1", "tint1_hand.png"),
     head: resolve("Skin", "Tint 1", "tint1_head.png"),
     eyes: resolve("Face", "Eyes", "eyeBrown_large.png"),
-    eyebrows: resolve("Face", "Eyebrows", "brown1Brow1.png"),
+    eyebrows: resolve("Face", "Eyebrows", "brown1Brow2.png"),
     nose: resolve("Face", "Nose", "Tint 1", "tint1Nose1.png"),
     hair: resolve("Hair", "Black", "blackMan1.png"),
-    mouths: {
-      closed: resolve("Face", "Mouth", "mouth_straight.png"),
-      open: resolve("Face", "Mouth", "mouth_oh.png"),
-      wide: resolve("Face", "Mouth", "mouth_glad.png"),
-    },
+    mouthClosed: resolve("Face", "Mouth", "mouth_straight.png"),
+    mouthOpen: resolve("Face", "Mouth", "mouth_oh.png"),
+    mouthWide: resolve("Face", "Mouth", "mouth_glad.png"),
   },
   friend: {
-    pants: resolve("Pants", "Red", "pantsRed1.png"),
-    shirt: resolve("Shirts", "Red", "redShirt1.png"),
     shoes: resolve("Shoes", "Brown 1", "brownShoe1.png"),
-    arm: resolve("Shirts", "Red", "redArm_short.png"),
+    legs: resolve("Pants", "Red", "pantsRed_long.png"),
+    pants: resolve("Pants", "Red", "pantsRed1.png"),
+    neck: resolve("Skin", "Tint 2", "tint2_neck.png"),
+    shirt: resolve("Shirts", "Red", "redShirt1.png"),
+    arms: resolve("Shirts", "Red", "redArm_short.png"),
+    hands: resolve("Skin", "Tint 2", "tint2_hand.png"),
     head: resolve("Skin", "Tint 2", "tint2_head.png"),
     eyes: resolve("Face", "Eyes", "eyeBlue_large.png"),
-    eyebrows: resolve("Face", "Eyebrows", "blackBrow1.png"),
+    eyebrows: resolve("Face", "Eyebrows", "blackBrow2.png"),
     nose: resolve("Face", "Nose", "Tint 2", "tint2Nose1.png"),
     hair: resolve("Hair", "Blonde", "blondeWoman1.png"),
-    mouths: {
-      closed: resolve("Face", "Mouth", "mouth_straight.png"),
-      open: resolve("Face", "Mouth", "mouth_oh.png"),
-      wide: resolve("Face", "Mouth", "mouth_happy.png"),
-    },
+    mouthClosed: resolve("Face", "Mouth", "mouth_straight.png"),
+    mouthOpen: resolve("Face", "Mouth", "mouth_oh.png"),
+    mouthWide: resolve("Face", "Mouth", "mouth_happy.png"),
   },
 };
 
 const buildCharacter = async (charId, preset) => {
   const charDir = path.join(publicDir, "assets/characters", charId);
+  fs.rmSync(charDir, { recursive: true, force: true });
   ensureDir(charDir);
-
   const sharp = (await import("sharp")).default;
 
-  // Composite lower-body clothing into one aligned body layer
-  const bodyLayers = [preset.pants, preset.shirt, preset.shoes];
-  const meta = await sharp(preset.pants).metadata();
-  const width = meta.width ?? 128;
-  const height = meta.height ?? 256;
-
-  let body = sharp({
-    create: { width, height, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
-  });
-
-  for (const layerPath of bodyLayers) {
-    body = body.composite([{ input: layerPath, top: 0, left: 0 }]);
+  const sizes = {};
+  const layers = {};
+  for (const [layer, src] of Object.entries(preset)) {
+    copyFile(src, path.join(charDir, LAYER_FILES[layer]));
+    const { width, height } = await sharp(src).metadata();
+    sizes[layer] = { width, height };
+    layers[layer] = `assets/characters/${charId}/${LAYER_FILES[layer]}`;
   }
 
-  await body.png().toFile(path.join(charDir, "body.png"));
+  const parts = KENNEY_LAYOUT.parts.map((anchor) => {
+    if (anchor.layer === "mouth") {
+      return { layer: "mouth", ...mouthBox(sizes.mouthClosed) };
+    }
+    const { width, height } = sizes[anchor.layer];
+    const x = anchor.cx !== undefined ? Math.round(anchor.cx - width / 2) : anchor.x;
+    return {
+      layer: anchor.layer,
+      x,
+      y: anchor.y,
+      width,
+      height,
+      ...(anchor.flipX ? { flipX: true } : {}),
+    };
+  });
 
-  copyFile(preset.head, path.join(charDir, "head.png"));
-  copyFile(preset.eyes, path.join(charDir, "eyes.png"));
-  copyFile(preset.eyebrows, path.join(charDir, "eyebrows.png"));
-  copyFile(preset.nose, path.join(charDir, "nose.png"));
-  copyFile(preset.hair, path.join(charDir, "hair.png"));
-  copyFile(preset.arm, path.join(charDir, "arm-left.png"));
-  copyFile(preset.arm, path.join(charDir, "arm-right.png"));
-  copyFile(preset.mouths.closed, path.join(charDir, "mouth-closed.png"));
-  copyFile(preset.mouths.open, path.join(charDir, "mouth-open.png"));
-  copyFile(preset.mouths.wide, path.join(charDir, "mouth-wide.png"));
+  const layout = {
+    canvas: KENNEY_LAYOUT.canvas,
+    parts,
+    mouths: {
+      closed: mouthBox(sizes.mouthClosed),
+      open: mouthBox(sizes.mouthOpen),
+      wide: mouthBox(sizes.mouthWide),
+    },
+  };
+
+  fs.writeFileSync(path.join(charDir, "layout.json"), `${JSON.stringify(layout, null, 2)}\n`);
+  return { layers, layout };
 };
+
+const mouthBox = ({ width, height }) => ({
+  x: Math.round(KENNEY_LAYOUT.mouthCenter.cx - width / 2),
+  y: Math.round(KENNEY_LAYOUT.mouthCenter.cy - height / 2),
+  width,
+  height,
+});
 
 const main = async () => {
   ensureDir(publicDir);
@@ -121,27 +189,11 @@ const main = async () => {
     throw new Error("Kenney PNG folder missing. Run npm run download-assets first.");
   }
 
-  // Validate friend red pants path — folder names vary
-  if (!fs.existsSync(CHARACTER_PRESETS.friend.pants)) {
-    CHARACTER_PRESETS.friend.pants = resolve("Pants", "Red", "pantsRed11.png");
-  }
-  if (!fs.existsSync(CHARACTER_PRESETS.friend.pants)) {
-    CHARACTER_PRESETS.friend.pants = resolve("Pants", "Red", "pantsRed1_long.png");
-  }
-  if (!fs.existsSync(CHARACTER_PRESETS.friend.shirt)) {
-    CHARACTER_PRESETS.friend.shirt = resolve("Shirts", "Red", "redShirt1.png");
-  }
-  if (!fs.existsSync(CHARACTER_PRESETS.friend.arm)) {
-    CHARACTER_PRESETS.friend.arm = resolve("Shirts", "Red", "redArm_short.png");
-  }
-  if (!fs.existsSync(CHARACTER_PRESETS.friend.hair)) {
-    CHARACTER_PRESETS.friend.hair = resolve("Hair", "Blonde", "blondeMan1.png");
+  const built = {};
+  for (const [charId, preset] of Object.entries(CHARACTER_PRESETS)) {
+    built[charId] = await buildCharacter(charId, preset);
   }
 
-  await buildCharacter("hero", CHARACTER_PRESETS.hero);
-  await buildCharacter("friend", CHARACTER_PRESETS.friend);
-
-  // Backgrounds (generated flat plates)
   const bgDir = path.join(publicDir, "assets/backgrounds");
   ensureDir(bgDir);
   const sharp = (await import("sharp")).default;
@@ -182,11 +234,24 @@ const main = async () => {
     path.join(publicDir, "assets", "ASSETS.md"),
     `# Test Assets
 
-- Kenney Modular Character Pack (CC0) - correctly layered skin, clothing, face parts
-- Mouth flaps from Kenney Face/Mouth sprites (straight / oh / glad)
+- Kenney Modular Character Pack (CC0) with per-part layout anchors
+- Mouth flaps from Kenney Face/Mouth sprites
 - Generated flat-color backgrounds
 `,
   );
+
+  // Episode JSON embeds layers + layout so Remotion needs no runtime fetches
+  const episodePath = path.join(root, "src/data/testEpisode.json");
+  if (fs.existsSync(episodePath)) {
+    const episode = JSON.parse(fs.readFileSync(episodePath, "utf8"));
+    for (const [charId, character] of Object.entries(episode.characters ?? {})) {
+      if (built[charId]) {
+        character.layers = built[charId].layers;
+        character.layout = built[charId].layout;
+      }
+    }
+    fs.writeFileSync(episodePath, `${JSON.stringify(episode, null, 2)}\n`);
+  }
 
   console.log("Asset preparation complete.");
 };

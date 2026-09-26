@@ -10,7 +10,7 @@ export const getMouthShapeForFrame = (
     return "closed";
   }
 
-  // ~8 flaps per second at 12fps = swap every 1-2 frames
+  // ~6 flaps per second at 12fps = swap every 2 frames
   const flapRate = Math.max(2, Math.round(fps / 6));
   const flapIndex = Math.floor(frame / flapRate);
 
@@ -27,14 +27,12 @@ export const isCharacterSpeakingAtFrame = (
   characterId: string,
   frame: number,
   dialogue: Array<{ characterId: string; startFrame: number; endFrame: number }>,
-  sceneStartFrame: number,
 ): boolean => {
-  const localFrame = frame - sceneStartFrame;
   return dialogue.some(
     (line) =>
       line.characterId === characterId &&
-      localFrame >= line.startFrame &&
-      localFrame < line.endFrame,
+      frame >= line.startFrame &&
+      frame < line.endFrame,
   );
 };
 

@@ -10,7 +10,14 @@ export const TestEpisode: React.FC<TestEpisodeProps> = ({ episode }) => {
       {episode.scenes.map((shot) => {
         const from = frameOffset;
         frameOffset += shot.durationInFrames;
-        return <CutoutScene key={shot.id} shot={shot} from={from} />;
+        return (
+          <CutoutScene
+            key={shot.id}
+            shot={shot}
+            characters={episode.characters}
+            from={from}
+          />
+        );
       })}
     </AbsoluteFill>
   );
