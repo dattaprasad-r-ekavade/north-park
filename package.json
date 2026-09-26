@@ -1,0 +1,27 @@
+{
+  "name": "north-park",
+  "version": "0.1.0",
+  "description": "South Park-style paper cutout video pipeline with Remotion",
+  "scripts": {
+    "dev": "remotion studio",
+    "build": "remotion bundle",
+    "render": "remotion render TestEpisode out/test-episode.mp4 --timeout=120000",
+    "render:still": "remotion still TestEpisode out/preview.png --frame=60",
+    "upgrade": "remotion upgrade",
+    "download-assets": "powershell -ExecutionPolicy Bypass -File scripts/download-assets.ps1"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.286",
+    "@remotion/media-utils": "^4.0.286",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.286",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "sharp": "^0.33.5",
+    "typescript": "^5.7.2"
+  }
+}

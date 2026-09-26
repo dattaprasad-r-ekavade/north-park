@@ -1,0 +1,94 @@
+{
+  "title": "North Park Test Episode",
+  "fps": 12,
+  "durationInFrames": 360,
+  "scenes": [
+    {
+      "id": "scene-1-town",
+      "background": "assets/backgrounds/town-sky.png",
+      "durationInFrames": 180,
+      "characters": [
+        {
+          "id": "hero",
+          "layers": {
+            "body": "assets/characters/hero/body.png",
+            "head": "assets/characters/hero/head.png",
+            "eyes": "assets/characters/hero/eyes.png",
+            "eyebrows": "assets/characters/hero/eyebrows.png",
+            "nose": "assets/characters/hero/nose.png",
+            "hair": "assets/characters/hero/hair.png",
+            "mouthClosed": "assets/characters/hero/mouth-closed.png",
+            "mouthOpen": "assets/characters/hero/mouth-open.png",
+            "mouthWide": "assets/characters/hero/mouth-wide.png",
+            "leftArm": "assets/characters/hero/arm-left.png",
+            "rightArm": "assets/characters/hero/arm-right.png"
+          },
+          "placement": { "x": 280, "y": 420, "scale": 2.2 }
+        },
+        {
+          "id": "friend",
+          "layers": {
+            "body": "assets/characters/friend/body.png",
+            "head": "assets/characters/friend/head.png",
+            "eyes": "assets/characters/friend/eyes.png",
+            "eyebrows": "assets/characters/friend/eyebrows.png",
+            "nose": "assets/characters/friend/nose.png",
+            "hair": "assets/characters/friend/hair.png",
+            "mouthClosed": "assets/characters/friend/mouth-closed.png",
+            "mouthOpen": "assets/characters/friend/mouth-open.png",
+            "mouthWide": "assets/characters/friend/mouth-wide.png",
+            "leftArm": "assets/characters/friend/arm-left.png",
+            "rightArm": "assets/characters/friend/arm-right.png"
+          },
+          "placement": { "x": 720, "y": 430, "scale": 2.1 }
+        }
+      ],
+      "dialogue": [
+        {
+          "characterId": "hero",
+          "text": "Dude, this totally looks like a paper cutout town!",
+          "startFrame": 12,
+          "endFrame": 90
+        },
+        {
+          "characterId": "friend",
+          "text": "Yeah bro, check my mouth flaps at twelve FPS.",
+          "startFrame": 96,
+          "endFrame": 170
+        }
+      ]
+    },
+    {
+      "id": "scene-2-classroom",
+      "background": "assets/backgrounds/classroom.png",
+      "durationInFrames": 180,
+      "characters": [
+        {
+          "id": "hero",
+          "layers": {
+            "body": "assets/characters/hero/body.png",
+            "head": "assets/characters/hero/head.png",
+            "eyes": "assets/characters/hero/eyes.png",
+            "eyebrows": "assets/characters/hero/eyebrows.png",
+            "nose": "assets/characters/hero/nose.png",
+            "hair": "assets/characters/hero/hair.png",
+            "mouthClosed": "assets/characters/hero/mouth-closed.png",
+            "mouthOpen": "assets/characters/hero/mouth-open.png",
+            "mouthWide": "assets/characters/hero/mouth-wide.png",
+            "leftArm": "assets/characters/hero/arm-left.png",
+            "rightArm": "assets/characters/hero/arm-right.png"
+          },
+          "placement": { "x": 500, "y": 400, "scale": 2.4 }
+        }
+      ],
+      "dialogue": [
+        {
+          "characterId": "hero",
+          "text": "Remotion layers plus style-locked stills equals cheap South Park vibes.",
+          "startFrame": 10,
+          "endFrame": 170
+        }
+      ]
+    }
+  ]
+}
